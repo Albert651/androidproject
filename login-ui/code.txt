@@ -1,0 +1,195 @@
+If you haven’t already, set up navigation in your app. Create a StackNavigator for your application:
+
+javascript
+
+import * as React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
+import MatiereList from './MatiereList';
+import AddMatiere from './AddMatiere'; // This is the new screen
+
+const Stack = createStackNavigator();
+
+function AppNavigator() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="MatiereList" component={MatiereList} />
+        <Stack.Screen name="AddMatiere" component={AddMatiere} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default AppNavigator;
+
+Add a Button to Navigate to the AddMatiere Screen:
+
+Update your MatiereList component to include a button that navigates to the AddMatiere screen. You’ll use TouchableOpacity to create the button.
+
+javascript
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+
+const API_URL = 'http://192.168.137.224:8000/matieres/'; // Replace with your actual API URL
+
+function MatiereList({ navigation }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Fetch data from API
+    const fetchData = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id_matiere.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text style={styles.title}>{item.nom_matiere}</Text>
+            <Text style={styles.subtitle}>
+              Enseignant: {item.enseignant ? `${item.enseignant.first_name} ${item.enseignant.last_name}` : 'N/A'}
+            </Text>
+          </View>
+        )}
+      />
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('AddMatiere')}
+      >
+        <Text style={styles.addButtonText}>Add Matière</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  item: {
+    padding: 16,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#555',
+  },
+  addButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
+
+export default MatiereList;
+
+Create the AddMatiere Screen:
+
+Create a new file named AddMatiere.js for the screen where users can add a new item. This is a simple example:
+
+javascript
+
+import React from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+
+function AddMatiere() {
+  // You can handle form submission and state management here
+  const handleAdd = () => {
+    // Logic to handle adding a new item
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Add New Matière</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Nom Matière"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Enseignant ID"
+      />
+      <Button title="Add" onPress={handleAdd} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  input: {
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+});
+
+export default AddMatiere;

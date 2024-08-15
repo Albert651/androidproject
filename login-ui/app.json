@@ -1,0 +1,10 @@
+{
+  "name": "login-ui",
+  "slug": "login-ui",
+  "plugins": [
+    "expo-secure-store"
+  ],
+  "android": {
+    "package": "com.anonymous.loginui"
+  }
+}
